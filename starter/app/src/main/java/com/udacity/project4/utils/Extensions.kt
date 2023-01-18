@@ -3,6 +3,7 @@ package com.udacity.project4.utils
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.util.Log
 import android.view.View
@@ -65,4 +66,10 @@ fun View.fadeOut() {
             this@fadeOut.visibility = View.GONE
         }
     })
+}
+
+fun Context.startAndClear(intent: Intent){
+    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    startActivity(intent)
 }
