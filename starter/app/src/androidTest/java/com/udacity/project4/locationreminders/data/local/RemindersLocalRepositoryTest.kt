@@ -69,6 +69,20 @@ class RemindersLocalRepositoryTest {
     }
 
     @Test
+    fun getReminder_noReminderInDB_returnError() = runBlocking {
+
+
+        val result = remindersLocalRepository.getReminder(ObjectFactory.reminder1.id)
+
+        MatcherAssert.assertThat(
+            result as Result.Error,
+            CoreMatchers.`is`(CoreMatchers.notNullValue())
+        )
+        MatcherAssert.assertThat(result.message, CoreMatchers.`is`("Reminder not found!"))
+
+    }
+
+    @Test
     fun saveReminder_getById() = runBlocking {
 
         remindersLocalRepository.saveReminder(ObjectFactory.reminder1)
