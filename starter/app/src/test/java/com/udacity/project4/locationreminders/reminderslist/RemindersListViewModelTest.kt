@@ -3,6 +3,7 @@ package com.udacity.project4.locationreminders.reminderslist
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth
 import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.ReminderDataSource
@@ -74,4 +75,14 @@ class RemindersListViewModelTest {
         mainCoroutineRule.resumeDispatcher()
         assertThat(viewModel.showLoading.getOrAwaitValue(), `is`(false))
     }
+
+    @Test
+    fun loadReminders_setReturnErrorTrue_getError() {
+        reminderDataSource.setReturnError(true)
+
+        viewModel.loadReminders()
+
+        Truth.assertThat(viewModel.showSnackBar.getOrAwaitValue()).isEqualTo("Error getting data")
+    }
+
 }

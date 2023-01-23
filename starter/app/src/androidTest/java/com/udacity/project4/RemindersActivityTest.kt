@@ -9,6 +9,7 @@ import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.contrib.RecyclerViewActions
+import androidx.test.espresso.matcher.RootMatchers
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -22,6 +23,7 @@ import com.udacity.project4.util.DataBindingIdlingResource
 import com.udacity.project4.util.monitorActivity
 import com.udacity.project4.utils.EspressoIdlingResource
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.CoreMatchers
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -59,7 +61,7 @@ class RemindersActivityTest :
                     get() as ReminderDataSource
                 )
             }
-            single {
+            viewModel {
                 SaveReminderViewModel(
                     appContext,
                     get() as ReminderDataSource
@@ -131,4 +133,40 @@ class RemindersActivityTest :
 
         activityScenario.close()
     }
+
+    @Test
+    fun saveReminderScreen_showToastMessage() {
+
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        lateinit var  activity: RemindersActivity
+        activityScenario.onActivity {
+            activity = it
+        }
+        dataBindingIdlingResource.monitorActivity(activityScenario)
+
+        Espresso.onView(ViewMatchers.withId(R.id.addReminderFAB)).perform(ViewActions.click())
+        Espresso.onView(ViewMatchers.withId(R.id.reminderTitle))
+            .perform(ViewActions.typeText(ObjectFactory.reminder1.title))
+        Espresso.onView(ViewMatchers.withId(R.id.reminderDescription))
+            .perform(ViewActions.typeText(ObjectFactory.reminder1.description))
+
+        Espresso.onView(ViewMatchers.withId(R.id.selectLocation)).perform(ViewActions.click())
+        Espresso.onView(ViewMatchers.withId(R.id.mapFragment)).perform(ViewActions.click())
+        Espresso.onView(ViewMatchers.withId(R.id.btnSave)).perform(ViewActions.click())
+        Espresso.onView(ViewMatchers.withId(R.id.saveReminder)).perform(ViewActions.click())
+        Espresso.onView(ViewMatchers.withText(R.string.reminder_saved)).inRoot(
+            RootMatchers.withDecorView(
+                CoreMatchers.not(
+                    CoreMatchers.`is`(
+                        activity.window.decorView
+                    )
+                )
+            )
+        )
+            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+
+
+        activityScenario.close()
+    }
+
 }
