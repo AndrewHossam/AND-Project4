@@ -144,8 +144,10 @@ class SaveReminderFragment : BaseFragment() {
         //  permissions were approved
         val foregroundLocationApproved = (
                 PackageManager.PERMISSION_GRANTED ==
-                        checkSelfPermission(requireContext(),
-                            Manifest.permission.ACCESS_FINE_LOCATION))
+                        checkSelfPermission(
+                            requireContext(),
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ))
         val backgroundPermissionApproved =
             if (runningQOrLater) {
                 PackageManager.PERMISSION_GRANTED ==
@@ -202,8 +204,15 @@ class SaveReminderFragment : BaseFragment() {
                 try {
                     // Show the dialog by calling startResolutionForResult(),
                     // and check the result in onActivityResult().
-                    exception.startResolutionForResult(requireActivity(),
-                        REQUEST_TURN_DEVICE_LOCATION_ON)
+                    startIntentSenderForResult(
+                        exception.resolution.intentSender,
+                        REQUEST_TURN_DEVICE_LOCATION_ON,
+                        null,
+                        0,
+                        0,
+                        0,
+                        null
+                    )
                 } catch (sendEx: IntentSender.SendIntentException) {
                     Log.d(TAG, "Error geting location settings resolution: " + sendEx.message)
                 }
@@ -232,7 +241,8 @@ class SaveReminderFragment : BaseFragment() {
             // Set the request ID, string to identify the geofence.
             .setRequestId(reminderDataItem.id)
             // Set the circular region of this geofence.
-            .setCircularRegion(reminderDataItem.latitude!!,
+            .setCircularRegion(
+                reminderDataItem.latitude!!,
                 reminderDataItem.longitude!!,
                 100f
             )
@@ -258,25 +268,19 @@ class SaveReminderFragment : BaseFragment() {
 
         // First, remove any existing geofences that use our pending intent
 
-        geofencingClient.removeGeofences(geofencePendingIntent)?.run {
-            // Regardless of success/failure of the removal, add the new geofence
-            addOnCompleteListener {
-                // Add the new geofence request with the new geofence
-                geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
-                    addOnSuccessListener {
-                        // Geofences added.
+        geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
+            addOnSuccessListener {
+                // Geofences added.
 
-                        Log.e("Add Geofence", geofence.requestId)
-                        // Tell the viewmodel that we've reached the end of the game and
-                        // activated the last "geofence" --- by removing the Geofence.
-                        _viewModel.validateAndSaveReminder(reminderDataItem)
-                    }
-                    addOnFailureListener {
-                        // Failed to add geofences.
-                        if ((it.message != null)) {
-                            Log.w(TAG, it.message!!)
-                        }
-                    }
+                Log.e("Add Geofence", geofence.requestId)
+                // Tell the viewmodel that we've reached the end of the game and
+                // activated the last "geofence" --- by removing the Geofence.
+                _viewModel.validateAndSaveReminder(reminderDataItem)
+            }
+            addOnFailureListener {
+                // Failed to add geofences.
+                if ((it.message != null)) {
+                    Log.w(TAG, it.message!!)
                 }
             }
         }
