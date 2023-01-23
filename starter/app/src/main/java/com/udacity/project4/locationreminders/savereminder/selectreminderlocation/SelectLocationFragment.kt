@@ -140,6 +140,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             getCurrentLocation()
             map.isMyLocationEnabled = true
         } else {
+            Toast.makeText(requireContext(), R.string.permission_denied_explanation, Toast.LENGTH_SHORT).show()
             requestPermissions(
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 REQUEST_LOCATION_PERMISSION
@@ -152,15 +153,18 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         LocationServices.getFusedLocationProviderClient(requireActivity())
             .lastLocation
             .addOnSuccessListener {
-                val location = LatLng(it.latitude, it.longitude)
-                map.moveCamera(
-                    CameraUpdateFactory.newLatLngZoom(location, 15f)
-                )
-                marker = map.addMarker(
-                    MarkerOptions().position(location)
-                        .title(getString(R.string.current_location))
-                )
-                marker.showInfoWindow()
+                it?.let {
+                    val location = LatLng(it.latitude, it.longitude)
+                    map.moveCamera(
+                        CameraUpdateFactory.newLatLngZoom(location, 15f)
+                    )
+                    marker = map.addMarker(
+                        MarkerOptions().position(location)
+                            .title(getString(R.string.current_location))
+                    )
+                    marker.showInfoWindow()
+
+                }
             }
     }
 
