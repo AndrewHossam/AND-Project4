@@ -25,7 +25,6 @@ import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import java.util.*
 
@@ -71,6 +70,12 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         if (requestCode == REQUEST_LOCATION_PERMISSION) {
             if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
                 enableMyLocation()
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    R.string.permission_denied_explanation,
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -141,7 +146,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             getCurrentLocation()
             map.isMyLocationEnabled = true
         } else {
-            Toast.makeText(requireContext(), R.string.permission_denied_explanation, Toast.LENGTH_SHORT).show()
             requestPermissions(
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 REQUEST_LOCATION_PERMISSION
